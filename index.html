@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaMask State Diff</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>MetaMask State Diff</h1>
+  <div class="instructions">
+    <p>You can export the MetaMask state by running the following command:</p>
+    <div class="code-container">
+        <code id="exportCommand">copy(await stateHooks.getPersistedState())</code>
+        <button class="copy-button" onclick="copyCommand(event)">📋</button>
+    </div>
+    <p>⚠️ Warning: this will export the complete state, including your Vault. Use at your own risk.</p>
+  </div>  
+  <div>
+    <h2>State A</h2>
+    <textarea id="input1" placeholder="Paste MetaMask state here..."></textarea>
+  </div>
+  <div>
+    <h2>State B</h2>
+    <textarea id="input2" placeholder="Paste MetaMask state here..."></textarea>
+  </div>
+  <div class="btn">
+    <button onclick="showDiff()">Show Differences</button>
+  </div>
+  <h2>Controllers Differences</h2>
+  <div class="diff-container">
+    <div class="diff-column">
+      <h2>State A</h2>
+      <div id="diffOutput1"></div>
+    </div>
+    <div class="diff-column">
+      <h2>State B</h2>
+      <div id="diffOutput2"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
