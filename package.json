@@ -2,7 +2,7 @@
     "name": "metamask-state-diff",
     "version": "1.0.0",
     "scripts": {
-      "build": "cp -r * dist"
+      "build": "mkdir -p dist && cp -r * dist"
     },
     "dependencies": {}
   }
