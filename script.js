@@ -98,13 +98,20 @@ function displayControllers(state, otherState, outputElement, column) {
     title.prepend(icon);
 
     const content = document.createElement('pre');
+    
+    // Always use the current state's data for display
     const controllerData = state.data[controller];
     const otherControllerData = otherState.data ? otherState.data[controller] : undefined;
 
-    content.innerHTML = highlightDifferences(controllerData, otherControllerData, column);
+    // Pass the states in the correct order for comparison
+    content.innerHTML = highlightDifferences(
+      controllerData,  // current state's data
+      otherControllerData,  // other state's data for comparison
+      column
+    );
 
     if (JSON.stringify(controllerData) !== JSON.stringify(otherControllerData)) {
-      title.classList.add('updated'); // Highlight the title if there are differences
+      title.classList.add('updated');
     }
 
     content.classList.add('controller-content', 'hidden');
@@ -133,31 +140,64 @@ function toggleController(controller) {
 }
 
 function highlightDifferences(obj1, obj2, column) {
+  if (!obj1 || !obj2) {
+    return JSON.stringify(column === 'B' ? obj2 : obj1, null, 2);
+  }
   const diff = compareObjects(obj1, obj2, column);
   return formatDiff(diff);
 }
 
 function compareObjects(obj1, obj2, column) {
   const result = {};
+  const allKeys = new Set([...Object.keys(obj1 || {}), ...Object.keys(obj2 || {})]);
 
-  for (const key in obj1) {
-    if (!(key in obj2)) {
-      result[key] = { value: obj1[key], type: 'extra' };
-    } else if (typeof obj1[key] === 'object' && obj1[key] !== null && typeof obj2[key] === 'object' && obj2[key] !== null) {
-      const nestedDiff = compareObjects(obj1[key], obj2[key], column);
-      result[key] = { value: nestedDiff, type: Object.keys(nestedDiff).some(k => nestedDiff[k].type !== 'equal') ? 'updated' : 'equal' };
-    } else if (JSON.stringify(obj1[key]) !== JSON.stringify(obj2[key])) {
-      result[key] = { value: obj1[key], type: 'updated' };
-    } else {
-      result[key] = { value: obj1[key], type: 'equal' };
-    }
-  }
-
-  if (column === 'A') {
-    for (const key in obj2) {
-      if (!(key in obj1)) {
-        result[key] = { value: obj2[key], type: 'extra' };
+  for (const key of allKeys) {
+    const val1 = obj1?.[key];
+    const val2 = obj2?.[key];
+    
+    // Always use the first parameter's value (obj1)
+    const currentValue = val1;
+    
+    // Key exists in both objects
+    if (key in (obj1 || {}) && key in (obj2 || {})) {
+      if (typeof val1 === 'object' && val1 !== null && typeof val2 === 'object' && val2 !== null) {
+        // For arrays, handle them directly
+        if (Array.isArray(val1) || Array.isArray(val2)) {
+          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+            result[key] = {
+              value: currentValue,
+              type: 'updated'
+            };
+          } else {
+            result[key] = {
+              value: currentValue,
+              type: 'equal'
+            };
+          }
+        } else {
+          // For objects, recurse
+          const nestedDiff = compareObjects(val1, val2, column);
+          if (Object.keys(nestedDiff).length > 0) {
+            result[key] = { value: nestedDiff, type: 'nested' };
+          } else {
+            result[key] = { value: currentValue, type: 'equal' };
+          }
+        }
+      } else if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+        result[key] = {
+          value: currentValue,
+          type: 'updated'
+        };
+      } else {
+        result[key] = {
+          value: currentValue,
+          type: 'equal'
+        };
       }
+    }
+    // Key only in current object
+    else if (key in (obj1 || {})) {
+      result[key] = { value: val1, type: 'updated' };
     }
   }
 
@@ -168,17 +208,27 @@ function formatDiff(diff) {
   const formatted = [];
 
   for (const key in diff) {
-    const value = diff[key].value;
-    const type = diff[key].type;
+    const { value, type, oldValue } = diff[key];
     let formattedValue;
 
-    if (typeof value === 'object' && value !== null) {
-      formattedValue = Object.keys(value).length === 0 ? (Array.isArray(value) ? '[]' : '{}') : formatDiff(value);
+    if (value === null) {
+      formattedValue = 'null';
+    } else if (typeof value === 'object' && type === 'nested') {
+      formattedValue = formatDiff(value);
+    } else if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        formattedValue = `[${value.map(v => JSON.stringify(v)).join(', ')}]`;
+      } else if (Object.keys(value).length === 0) {
+        formattedValue = '{}';
+      } else {
+        formattedValue = JSON.stringify(value, null, 2);
+      }
     } else {
-      formattedValue = JSON.stringify(value, null, 2);
+      formattedValue = JSON.stringify(value);
     }
 
-    formatted.push(`<div class="${type}">${key}: ${formattedValue}</div>`);
+    const className = type === 'updated' ? 'updated' : type === 'equal' ? 'equal' : '';
+    formatted.push(`<div class="${className}">${key}: ${formattedValue}</div>`);
   }
 
   return formatted.join('');

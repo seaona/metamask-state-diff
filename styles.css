@@ -91,14 +91,14 @@ button {
     display: none;
 }
 
-.extra {
-    background-color: #97EAD2;
-}
-
 .updated {
     background-color: #fff95b;
 }
 
 .equal {
     background-color: transparent;
+}
+
+.controller-content div {
+    margin-left: 20px;
 }
