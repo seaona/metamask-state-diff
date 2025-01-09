@@ -257,3 +257,14 @@ function showTooltip(event) {
     tooltip.remove();
   }, 1000);
 }
+
+function clearInput(inputId) {
+    document.getElementById(inputId).value = '';
+}
+
+function clearAll() {
+    document.getElementById('input1').value = '';
+    document.getElementById('input2').value = '';
+    document.getElementById('diffOutput1').innerHTML = '';
+    document.getElementById('diffOutput2').innerHTML = '';
+}

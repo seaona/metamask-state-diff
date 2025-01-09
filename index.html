@@ -18,14 +18,21 @@
   </div>  
   <div>
     <h2>State A</h2>
-    <textarea id="input1" placeholder="Paste MetaMask state here..."></textarea>
+    <div class="input-container">
+        <textarea id="input1" placeholder="Paste MetaMask state here..."></textarea>
+        <button onclick="clearInput('input1')" class="clear-button">Clear State</button>
+    </div>
   </div>
   <div>
     <h2>State B</h2>
-    <textarea id="input2" placeholder="Paste MetaMask state here..."></textarea>
+    <div class="input-container">
+        <textarea id="input2" placeholder="Paste MetaMask state here..."></textarea>
+        <button onclick="clearInput('input2')" class="clear-button">Clear State</button>
+    </div>
   </div>
   <div class="btn">
     <button onclick="showDiff()">Show Differences</button>
+    <button onclick="clearAll()" class="clear-all-button">Clear All</button>
   </div>
   <h2>Controllers Differences</h2>
   <div class="diff-container">
